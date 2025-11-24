@@ -14,12 +14,6 @@ const config = {
   server: {
     port: process.env.PORT || 8000,
     host: process.env.HOST || '0.0.0.0'
-  },
-
-  // App Configuration
-  app: {
-    secretKey: process.env.SECRET_KEY || 'your-secret-key-here',
-    env: process.env.NODE_ENV || 'development'
   }
 };
 

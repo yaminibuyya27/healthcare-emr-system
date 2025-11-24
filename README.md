@@ -80,7 +80,6 @@ npm install
 # DB_USER=root
 # DB_PASSWORD=your_password
 # DB_NAME=EMR_System
-# PORT=8000
 
 # Start the server
 npm start
