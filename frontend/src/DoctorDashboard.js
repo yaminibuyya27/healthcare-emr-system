@@ -126,9 +126,7 @@ function DoctorDashboard() {
         if (response.data.success) {
           setSuccess('Prescription added successfully');
           resetPrescriptionForm();
-          if (activeTab === 'prescriptions') {
-            loadPrescriptions();
-          }
+          loadPrescriptions();
         }
       }
     } catch (err) {

@@ -412,6 +412,20 @@ class DatabaseManager {
 
   async getPrescriptions(userId) {
     try {
+      const [doctorResult] = await this.connection.query(`
+        SELECT d.doctor_id
+        FROM User u
+        JOIN Doctor d ON CONCAT('dr_', LOWER(d.last_name)) = u.username
+        WHERE u.user_id = ?
+        LIMIT 1
+      `, [userId]);
+
+      if (!doctorResult || doctorResult.length === 0) {
+        return { success: true, data: [] };
+      }
+
+      const doctorId = doctorResult[0].doctor_id;
+
       const [results] = await this.connection.query(`
         SELECT
           p.prescription_id,
@@ -432,7 +446,7 @@ class DatabaseManager {
         WHERE p.doctor_id = ?
         ORDER BY p.prescription_id ASC
         LIMIT 100
-      `, [userId]);
+      `, [doctorId]);
       return { success: true, data: results };
     } catch (error) {
       console.error('Error fetching prescriptions:', error.message);
