@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Select from 'react-select';
 import { appointmentsAPI, prescriptionsAPI, medicationsAPI } from './api';
 
 function DoctorDashboard() {
@@ -201,19 +202,22 @@ function DoctorDashboard() {
                 <form onSubmit={handlePrescriptionSubmit}>
                   <div style={styles.formGroup}>
                     <label style={styles.label}>Medication *</label>
-                    <select
-                      value={prescriptionForm.medication_id}
-                      onChange={(e) => setPrescriptionForm({ ...prescriptionForm, medication_id: e.target.value })}
-                      style={styles.input}
+                    <Select
+                      value={medications.find(m => m.medication_id === prescriptionForm.medication_id) ? {
+                        value: prescriptionForm.medication_id,
+                        label: `${medications.find(m => m.medication_id === prescriptionForm.medication_id)?.medication_name} - ${medications.find(m => m.medication_id === prescriptionForm.medication_id)?.dosage_form} (${medications.find(m => m.medication_id === prescriptionForm.medication_id)?.strength})`
+                      } : null}
+                      onChange={(option) => setPrescriptionForm({ ...prescriptionForm, medication_id: option?.value || '' })}
+                      options={medications.map(med => ({
+                        value: med.medication_id,
+                        label: `${med.medication_name} - ${med.dosage_form} (${med.strength})`
+                      }))}
+                      placeholder="Type to search medication..."
+                      isClearable
+                      isSearchable
+                      styles={selectStyles}
                       required
-                    >
-                      <option value="">Select Medication</option>
-                      {medications.map(med => (
-                        <option key={med.medication_id} value={med.medication_id}>
-                          {med.medication_name} - {med.dosage_form} ({med.strength})
-                        </option>
-                      ))}
-                    </select>
+                    />
                   </div>
                   <div style={styles.formGroup}>
                     <label style={styles.label}>Dosage Instructions *</label>
@@ -325,19 +329,22 @@ function DoctorDashboard() {
                 <form onSubmit={handlePrescriptionSubmit}>
                   <div style={styles.formGroup}>
                     <label style={styles.label}>Medication *</label>
-                    <select
-                      value={prescriptionForm.medication_id}
-                      onChange={(e) => setPrescriptionForm({ ...prescriptionForm, medication_id: e.target.value })}
-                      style={styles.input}
+                    <Select
+                      value={medications.find(m => m.medication_id === prescriptionForm.medication_id) ? {
+                        value: prescriptionForm.medication_id,
+                        label: `${medications.find(m => m.medication_id === prescriptionForm.medication_id)?.medication_name} - ${medications.find(m => m.medication_id === prescriptionForm.medication_id)?.dosage_form} (${medications.find(m => m.medication_id === prescriptionForm.medication_id)?.strength})`
+                      } : null}
+                      onChange={(option) => setPrescriptionForm({ ...prescriptionForm, medication_id: option?.value || '' })}
+                      options={medications.map(med => ({
+                        value: med.medication_id,
+                        label: `${med.medication_name} - ${med.dosage_form} (${med.strength})`
+                      }))}
+                      placeholder="Type to search medication..."
+                      isClearable
+                      isSearchable
+                      styles={selectStyles}
                       required
-                    >
-                      <option value="">Select Medication</option>
-                      {medications.map(med => (
-                        <option key={med.medication_id} value={med.medication_id}>
-                          {med.medication_name} - {med.dosage_form} ({med.strength})
-                        </option>
-                      ))}
-                    </select>
+                    />
                   </div>
                   <div style={styles.formGroup}>
                     <label style={styles.label}>Dosage Instructions *</label>
@@ -683,6 +690,52 @@ const styles = {
     boxShadow: '0 4px 15px rgba(5, 150, 105, 0.1)',
     fontSize: '14px'
   }
+};
+
+const selectStyles = {
+  control: (provided, state) => ({
+    ...provided,
+    padding: '6px',
+    border: '2px solid #e5e7eb',
+    borderRadius: '12px',
+    fontSize: '15px',
+    backgroundColor: '#f9fafb',
+    borderColor: state.isFocused ? '#667eea' : '#e5e7eb',
+    boxShadow: state.isFocused ? '0 0 0 4px rgba(102, 126, 234, 0.1)' : 'none',
+    '&:hover': {
+      borderColor: '#667eea'
+    }
+  }),
+  menu: (provided) => ({
+    ...provided,
+    borderRadius: '12px',
+    overflow: 'hidden',
+    boxShadow: '0 10px 40px rgba(0, 0, 0, 0.15)',
+    border: '1px solid #e5e7eb',
+    zIndex: 9999
+  }),
+  menuPortal: (provided) => ({
+    ...provided,
+    zIndex: 9999
+  }),
+  option: (provided, state) => ({
+    ...provided,
+    backgroundColor: state.isSelected ? '#667eea' : state.isFocused ? '#f3f4f6' : 'white',
+    color: state.isSelected ? 'white' : '#374151',
+    padding: '12px 16px',
+    cursor: 'pointer',
+    '&:active': {
+      backgroundColor: '#667eea'
+    }
+  }),
+  placeholder: (provided) => ({
+    ...provided,
+    color: '#9ca3af'
+  }),
+  singleValue: (provided) => ({
+    ...provided,
+    color: '#374151'
+  })
 };
 
 const styleSheet = document.createElement("style");

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Select from 'react-select';
 import axios from 'axios';
 
 function AdminDashboard() {
@@ -90,44 +91,54 @@ function AdminDashboard() {
           <div style={styles.filterRow}>
             <div style={styles.filterGroup}>
               <label style={styles.label}>Table Name</label>
-              <select
-                value={filterTable}
-                onChange={(e) => setFilterTable(e.target.value)}
-                style={styles.input}
-              >
-                <option value="">All Tables</option>
-                {uniqueTables.map(table => (
-                  <option key={table} value={table}>{table}</option>
-                ))}
-              </select>
+              <Select
+                value={filterTable ? { value: filterTable, label: filterTable } : { value: '', label: 'All Tables' }}
+                onChange={(option) => setFilterTable(option?.value || '')}
+                options={[
+                  { value: '', label: 'All Tables' },
+                  ...uniqueTables.map(table => ({ value: table, label: table }))
+                ]}
+                placeholder="Select table..."
+                isClearable
+                styles={selectStyles}
+                menuPortalTarget={document.body}
+                menuPosition="fixed"
+              />
             </div>
 
             <div style={styles.filterGroup}>
               <label style={styles.label}>Operation Type</label>
-              <select
-                value={filterOperation}
-                onChange={(e) => setFilterOperation(e.target.value)}
-                style={styles.input}
-              >
-                <option value="">All Operations</option>
-                {uniqueOperations.map(op => (
-                  <option key={op} value={op}>{op}</option>
-                ))}
-              </select>
+              <Select
+                value={filterOperation ? { value: filterOperation, label: filterOperation } : { value: '', label: 'All Operations' }}
+                onChange={(option) => setFilterOperation(option?.value || '')}
+                options={[
+                  { value: '', label: 'All Operations' },
+                  ...uniqueOperations.map(op => ({ value: op, label: op }))
+                ]}
+                placeholder="Select operation..."
+                isClearable
+                styles={selectStyles}
+                menuPortalTarget={document.body}
+                menuPosition="fixed"
+              />
             </div>
 
             <div style={styles.filterGroup}>
               <label style={styles.label}>Limit</label>
-              <select
-                value={limit}
-                onChange={(e) => setLimit(parseInt(e.target.value))}
-                style={styles.input}
-              >
-                <option value="50">50 records</option>
-                <option value="100">100 records</option>
-                <option value="200">200 records</option>
-                <option value="500">500 records</option>
-              </select>
+              <Select
+                value={{ value: limit, label: `${limit} records` }}
+                onChange={(option) => setLimit(option?.value || 100)}
+                options={[
+                  { value: 50, label: '50 records' },
+                  { value: 100, label: '100 records' },
+                  { value: 200, label: '200 records' },
+                  { value: 500, label: '500 records' }
+                ]}
+                placeholder="Select limit..."
+                styles={selectStyles}
+                menuPortalTarget={document.body}
+                menuPosition="fixed"
+              />
             </div>
 
             <div style={styles.filterGroup}>
@@ -683,6 +694,52 @@ const styles = {
     overflowY: 'auto',
     lineHeight: '1.6'
   }
+};
+
+const selectStyles = {
+  control: (provided, state) => ({
+    ...provided,
+    padding: '6px',
+    border: '2px solid #e5e7eb',
+    borderRadius: '12px',
+    fontSize: '15px',
+    backgroundColor: '#f9fafb',
+    borderColor: state.isFocused ? '#667eea' : '#e5e7eb',
+    boxShadow: state.isFocused ? '0 0 0 4px rgba(102, 126, 234, 0.1)' : 'none',
+    '&:hover': {
+      borderColor: '#667eea'
+    }
+  }),
+  menu: (provided) => ({
+    ...provided,
+    borderRadius: '12px',
+    overflow: 'hidden',
+    boxShadow: '0 10px 40px rgba(0, 0, 0, 0.15)',
+    border: '1px solid #e5e7eb',
+    zIndex: 9999
+  }),
+  menuPortal: (provided) => ({
+    ...provided,
+    zIndex: 9999
+  }),
+  option: (provided, state) => ({
+    ...provided,
+    backgroundColor: state.isSelected ? '#667eea' : state.isFocused ? '#f3f4f6' : 'white',
+    color: state.isSelected ? 'white' : '#374151',
+    padding: '12px 16px',
+    cursor: 'pointer',
+    '&:active': {
+      backgroundColor: '#667eea'
+    }
+  }),
+  placeholder: (provided) => ({
+    ...provided,
+    color: '#9ca3af'
+  }),
+  singleValue: (provided) => ({
+    ...provided,
+    color: '#374151'
+  })
 };
 
 const styleSheet = document.createElement("style");

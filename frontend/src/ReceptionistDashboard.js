@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Select from 'react-select';
 import { patientsAPI, appointmentsAPI, doctorsAPI } from './api';
 
 function ReceptionistDashboard() {
@@ -482,35 +483,41 @@ function ReceptionistDashboard() {
                 <form onSubmit={handleAppointmentSubmit}>
                   <div style={styles.formGroup}>
                     <label style={styles.label}>Patient *</label>
-                    <select
-                      value={appointmentForm.patient_id}
-                      onChange={(e) => setAppointmentForm({ ...appointmentForm, patient_id: e.target.value })}
-                      style={styles.input}
+                    <Select
+                      value={patients.find(p => p.patient_id === appointmentForm.patient_id) ? {
+                        value: appointmentForm.patient_id,
+                        label: `${patients.find(p => p.patient_id === appointmentForm.patient_id)?.first_name} ${patients.find(p => p.patient_id === appointmentForm.patient_id)?.last_name}`
+                      } : null}
+                      onChange={(option) => setAppointmentForm({ ...appointmentForm, patient_id: option?.value || '' })}
+                      options={patients.map(p => ({
+                        value: p.patient_id,
+                        label: `${p.first_name} ${p.last_name}`
+                      }))}
+                      placeholder="Type to search patient..."
+                      isClearable
+                      isSearchable
+                      styles={selectStyles}
                       required
-                    >
-                      <option value="">Select Patient</option>
-                      {patients.map(p => (
-                        <option key={p.patient_id} value={p.patient_id}>
-                          {p.first_name} {p.last_name} (ID: {p.patient_id})
-                        </option>
-                      ))}
-                    </select>
+                    />
                   </div>
                   <div style={styles.formGroup}>
                     <label style={styles.label}>Doctor *</label>
-                    <select
-                      value={appointmentForm.doctor_id}
-                      onChange={(e) => setAppointmentForm({ ...appointmentForm, doctor_id: e.target.value })}
-                      style={styles.input}
+                    <Select
+                      value={doctors.find(d => d.doctor_id === appointmentForm.doctor_id) ? {
+                        value: appointmentForm.doctor_id,
+                        label: `Dr. ${doctors.find(d => d.doctor_id === appointmentForm.doctor_id)?.first_name} ${doctors.find(d => d.doctor_id === appointmentForm.doctor_id)?.last_name} - ${doctors.find(d => d.doctor_id === appointmentForm.doctor_id)?.specialty}`
+                      } : null}
+                      onChange={(option) => setAppointmentForm({ ...appointmentForm, doctor_id: option?.value || '' })}
+                      options={doctors.map(d => ({
+                        value: d.doctor_id,
+                        label: `Dr. ${d.first_name} ${d.last_name} - ${d.specialty}`
+                      }))}
+                      placeholder="Type to search doctor..."
+                      isClearable
+                      isSearchable
+                      styles={selectStyles}
                       required
-                    >
-                      <option value="">Select Doctor</option>
-                      {doctors.map(d => (
-                        <option key={d.doctor_id} value={d.doctor_id}>
-                          Dr. {d.first_name} {d.last_name} - {d.specialty}
-                        </option>
-                      ))}
-                    </select>
+                    />
                   </div>
                   <div style={styles.formGroup}>
                     <label style={styles.label}>Appointment Date & Time *</label>
@@ -874,6 +881,52 @@ const styles = {
     boxShadow: '0 2px 8px rgba(16, 185, 129, 0.1)',
     animation: 'fadeIn 0.3s ease-out'
   }
+};
+
+const selectStyles = {
+  control: (provided, state) => ({
+    ...provided,
+    padding: '6px',
+    border: '2px solid #e5e7eb',
+    borderRadius: '12px',
+    fontSize: '15px',
+    backgroundColor: '#f9fafb',
+    borderColor: state.isFocused ? '#667eea' : '#e5e7eb',
+    boxShadow: state.isFocused ? '0 0 0 4px rgba(102, 126, 234, 0.1)' : 'none',
+    '&:hover': {
+      borderColor: '#667eea'
+    }
+  }),
+  menu: (provided) => ({
+    ...provided,
+    borderRadius: '12px',
+    overflow: 'hidden',
+    boxShadow: '0 10px 40px rgba(0, 0, 0, 0.15)',
+    border: '1px solid #e5e7eb',
+    zIndex: 9999
+  }),
+  menuPortal: (provided) => ({
+    ...provided,
+    zIndex: 9999
+  }),
+  option: (provided, state) => ({
+    ...provided,
+    backgroundColor: state.isSelected ? '#667eea' : state.isFocused ? '#f3f4f6' : 'white',
+    color: state.isSelected ? 'white' : '#374151',
+    padding: '12px 16px',
+    cursor: 'pointer',
+    '&:active': {
+      backgroundColor: '#667eea'
+    }
+  }),
+  placeholder: (provided) => ({
+    ...provided,
+    color: '#9ca3af'
+  }),
+  singleValue: (provided) => ({
+    ...provided,
+    color: '#374151'
+  })
 };
 
 const styleSheet = document.createElement("style");
