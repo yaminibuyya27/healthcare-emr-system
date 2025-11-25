@@ -264,7 +264,7 @@ class DatabaseManager {
         FROM Appointment a
         LEFT JOIN Patient p ON a.patient_id = p.patient_id
         LEFT JOIN Doctor d ON a.doctor_id = d.doctor_id
-        ORDER BY a.appointment_date DESC
+        ORDER BY a.appointment_id ASC
       `);
       return { success: true, data: results };
     } catch (error) {
@@ -380,7 +380,7 @@ class DatabaseManager {
   async getDoctors() {
     try {
       const [results] = await this.connection.query(
-        'SELECT doctor_id, first_name, last_name, specialty FROM Doctor ORDER BY last_name'
+        'SELECT doctor_id, first_name, last_name, specialty FROM Doctor ORDER BY doctor_id ASC'
       );
       return { success: true, data: results };
     } catch (error) {
@@ -401,7 +401,7 @@ class DatabaseManager {
           phone_number,
           email_address
         FROM Patient
-        ORDER BY last_name, first_name
+        ORDER BY patient_id ASC
       `);
       return { success: true, data: results };
     } catch (error) {
@@ -457,7 +457,7 @@ class DatabaseManager {
   async getMedications() {
     try {
       const [results] = await this.connection.query(
-        'SELECT medication_id, medication_name, dosage_form, strength FROM Medication ORDER BY medication_name'
+        'SELECT medication_id, medication_name, dosage_form, strength FROM Medication ORDER BY medication_id ASC'
       );
       return { success: true, data: results };
     } catch (error) {
