@@ -20,19 +20,44 @@ DELIMITER ;
 DROP TRIGGER IF EXISTS `after_appointment_update`;
 DELIMITER $$
 CREATE TRIGGER `after_appointment_update` AFTER UPDATE ON `Appointment` FOR EACH ROW BEGIN
+    IF OLD.patient_id != NEW.patient_id THEN
+        INSERT INTO Audit_Log (user_id, table_name, operation_type, record_id, field_changed, old_value, new_value)
+        VALUES (@current_user_id, 'Appointment', 'UPDATE', NEW.appointment_id, 'patient_id', OLD.patient_id, NEW.patient_id);
+    END IF;
+
+    IF OLD.doctor_id != NEW.doctor_id THEN
+        INSERT INTO Audit_Log (user_id, table_name, operation_type, record_id, field_changed, old_value, new_value)
+        VALUES (@current_user_id, 'Appointment', 'UPDATE', NEW.appointment_id, 'doctor_id', OLD.doctor_id, NEW.doctor_id);
+    END IF;
+
+    IF IFNULL(OLD.room_id, 0) != IFNULL(NEW.room_id, 0) THEN
+        INSERT INTO Audit_Log (user_id, table_name, operation_type, record_id, field_changed, old_value, new_value)
+        VALUES (@current_user_id, 'Appointment', 'UPDATE', NEW.appointment_id, 'room_id', OLD.room_id, NEW.room_id);
+    END IF;
+
     IF OLD.appointment_date != NEW.appointment_date THEN
         INSERT INTO Audit_Log (user_id, table_name, operation_type, record_id, field_changed, old_value, new_value)
         VALUES (@current_user_id, 'Appointment', 'UPDATE', NEW.appointment_id, 'appointment_date', OLD.appointment_date, NEW.appointment_date);
     END IF;
-    
+
+    IF IFNULL(OLD.reason_for_visit, '') != IFNULL(NEW.reason_for_visit, '') THEN
+        INSERT INTO Audit_Log (user_id, table_name, operation_type, record_id, field_changed, old_value, new_value)
+        VALUES (@current_user_id, 'Appointment', 'UPDATE', NEW.appointment_id, 'reason_for_visit', OLD.reason_for_visit, NEW.reason_for_visit);
+    END IF;
+
     IF OLD.status != NEW.status THEN
         INSERT INTO Audit_Log (user_id, table_name, operation_type, record_id, field_changed, old_value, new_value)
         VALUES (@current_user_id, 'Appointment', 'UPDATE', NEW.appointment_id, 'status', OLD.status, NEW.status);
     END IF;
-    
-    IF IFNULL(OLD.reason_for_visit, '') != IFNULL(NEW.reason_for_visit, '') THEN
+
+    IF IFNULL(OLD.follow_up_required, 0) != IFNULL(NEW.follow_up_required, 0) THEN
         INSERT INTO Audit_Log (user_id, table_name, operation_type, record_id, field_changed, old_value, new_value)
-        VALUES (@current_user_id, 'Appointment', 'UPDATE', NEW.appointment_id, 'reason_for_visit', OLD.reason_for_visit, NEW.reason_for_visit);
+        VALUES (@current_user_id, 'Appointment', 'UPDATE', NEW.appointment_id, 'follow_up_required', OLD.follow_up_required, NEW.follow_up_required);
+    END IF;
+
+    IF IFNULL(OLD.follow_up_date, '1900-01-01') != IFNULL(NEW.follow_up_date, '1900-01-01') THEN
+        INSERT INTO Audit_Log (user_id, table_name, operation_type, record_id, field_changed, old_value, new_value)
+        VALUES (@current_user_id, 'Appointment', 'UPDATE', NEW.appointment_id, 'follow_up_date', OLD.follow_up_date, NEW.follow_up_date);
     END IF;
 END$$
 DELIMITER ;
@@ -82,25 +107,55 @@ CREATE TRIGGER `after_patient_update` AFTER UPDATE ON `Patient` FOR EACH ROW BEG
         INSERT INTO Audit_Log (user_id, table_name, operation_type, record_id, field_changed, old_value, new_value)
         VALUES (@current_user_id, 'Patient', 'UPDATE', NEW.patient_id, 'first_name', OLD.first_name, NEW.first_name);
     END IF;
-    
+
     IF OLD.last_name != NEW.last_name THEN
         INSERT INTO Audit_Log (user_id, table_name, operation_type, record_id, field_changed, old_value, new_value)
         VALUES (@current_user_id, 'Patient', 'UPDATE', NEW.patient_id, 'last_name', OLD.last_name, NEW.last_name);
     END IF;
-    
+
     IF OLD.date_of_birth != NEW.date_of_birth THEN
         INSERT INTO Audit_Log (user_id, table_name, operation_type, record_id, field_changed, old_value, new_value)
         VALUES (@current_user_id, 'Patient', 'UPDATE', NEW.patient_id, 'date_of_birth', OLD.date_of_birth, NEW.date_of_birth);
     END IF;
-    
+
+    IF OLD.gender != NEW.gender THEN
+        INSERT INTO Audit_Log (user_id, table_name, operation_type, record_id, field_changed, old_value, new_value)
+        VALUES (@current_user_id, 'Patient', 'UPDATE', NEW.patient_id, 'gender', OLD.gender, NEW.gender);
+    END IF;
+
     IF IFNULL(OLD.phone_number, '') != IFNULL(NEW.phone_number, '') THEN
         INSERT INTO Audit_Log (user_id, table_name, operation_type, record_id, field_changed, old_value, new_value)
         VALUES (@current_user_id, 'Patient', 'UPDATE', NEW.patient_id, 'phone_number', OLD.phone_number, NEW.phone_number);
     END IF;
-    
+
     IF IFNULL(OLD.email_address, '') != IFNULL(NEW.email_address, '') THEN
         INSERT INTO Audit_Log (user_id, table_name, operation_type, record_id, field_changed, old_value, new_value)
         VALUES (@current_user_id, 'Patient', 'UPDATE', NEW.patient_id, 'email_address', OLD.email_address, NEW.email_address);
+    END IF;
+
+    IF IFNULL(OLD.street_address, '') != IFNULL(NEW.street_address, '') THEN
+        INSERT INTO Audit_Log (user_id, table_name, operation_type, record_id, field_changed, old_value, new_value)
+        VALUES (@current_user_id, 'Patient', 'UPDATE', NEW.patient_id, 'street_address', OLD.street_address, NEW.street_address);
+    END IF;
+
+    IF IFNULL(OLD.city, '') != IFNULL(NEW.city, '') THEN
+        INSERT INTO Audit_Log (user_id, table_name, operation_type, record_id, field_changed, old_value, new_value)
+        VALUES (@current_user_id, 'Patient', 'UPDATE', NEW.patient_id, 'city', OLD.city, NEW.city);
+    END IF;
+
+    IF IFNULL(OLD.state, '') != IFNULL(NEW.state, '') THEN
+        INSERT INTO Audit_Log (user_id, table_name, operation_type, record_id, field_changed, old_value, new_value)
+        VALUES (@current_user_id, 'Patient', 'UPDATE', NEW.patient_id, 'state', OLD.state, NEW.state);
+    END IF;
+
+    IF IFNULL(OLD.postal_code, '') != IFNULL(NEW.postal_code, '') THEN
+        INSERT INTO Audit_Log (user_id, table_name, operation_type, record_id, field_changed, old_value, new_value)
+        VALUES (@current_user_id, 'Patient', 'UPDATE', NEW.patient_id, 'postal_code', OLD.postal_code, NEW.postal_code);
+    END IF;
+
+    IF IFNULL(OLD.insurance_id, 0) != IFNULL(NEW.insurance_id, 0) THEN
+        INSERT INTO Audit_Log (user_id, table_name, operation_type, record_id, field_changed, old_value, new_value)
+        VALUES (@current_user_id, 'Patient', 'UPDATE', NEW.patient_id, 'insurance_id', OLD.insurance_id, NEW.insurance_id);
     END IF;
 END$$
 DELIMITER ;
@@ -156,29 +211,76 @@ DELIMITER ;
 DROP TRIGGER IF EXISTS `after_prescription_update`;
 DELIMITER $$
 CREATE TRIGGER `after_prescription_update` AFTER UPDATE ON `Prescription` FOR EACH ROW BEGIN
-    -- Save to Prescription_History
+    -- Track medication_id changes
+    IF OLD.medication_id != NEW.medication_id THEN
+        INSERT INTO Prescription_History (prescription_id, field_name, old_value, new_value, changed_by, operation_type)
+        VALUES (NEW.prescription_id, 'medication_id', OLD.medication_id, NEW.medication_id, @current_user_id, 'UPDATE');
+
+        INSERT INTO Audit_Log (user_id, table_name, operation_type, record_id, field_changed, old_value, new_value)
+        VALUES (@current_user_id, 'Prescription', 'UPDATE', NEW.prescription_id, 'medication_id', OLD.medication_id, NEW.medication_id);
+    END IF;
+
+    -- Track refill_count changes
+    IF IFNULL(OLD.refill_count, 0) != IFNULL(NEW.refill_count, 0) THEN
+        INSERT INTO Prescription_History (prescription_id, field_name, old_value, new_value, changed_by, operation_type)
+        VALUES (NEW.prescription_id, 'refill_count', OLD.refill_count, NEW.refill_count, @current_user_id, 'UPDATE');
+
+        INSERT INTO Audit_Log (user_id, table_name, operation_type, record_id, field_changed, old_value, new_value)
+        VALUES (@current_user_id, 'Prescription', 'UPDATE', NEW.prescription_id, 'refill_count', OLD.refill_count, NEW.refill_count);
+    END IF;
+
+    -- Track dosage_instructions changes
     IF OLD.dosage_instructions != NEW.dosage_instructions THEN
         INSERT INTO Prescription_History (prescription_id, field_name, old_value, new_value, changed_by, operation_type)
         VALUES (NEW.prescription_id, 'dosage_instructions', OLD.dosage_instructions, NEW.dosage_instructions, @current_user_id, 'UPDATE');
-        
+
         INSERT INTO Audit_Log (user_id, table_name, operation_type, record_id, field_changed, old_value, new_value)
         VALUES (@current_user_id, 'Prescription', 'UPDATE', NEW.prescription_id, 'dosage_instructions', OLD.dosage_instructions, NEW.dosage_instructions);
     END IF;
-    
+
+    -- Track start_date changes
     IF IFNULL(OLD.start_date, '1900-01-01') != IFNULL(NEW.start_date, '1900-01-01') THEN
         INSERT INTO Prescription_History (prescription_id, field_name, old_value, new_value, changed_by, operation_type)
         VALUES (NEW.prescription_id, 'start_date', OLD.start_date, NEW.start_date, @current_user_id, 'UPDATE');
-        
+
         INSERT INTO Audit_Log (user_id, table_name, operation_type, record_id, field_changed, old_value, new_value)
         VALUES (@current_user_id, 'Prescription', 'UPDATE', NEW.prescription_id, 'start_date', OLD.start_date, NEW.start_date);
     END IF;
-    
+
+    -- Track end_date changes
     IF IFNULL(OLD.end_date, '1900-01-01') != IFNULL(NEW.end_date, '1900-01-01') THEN
         INSERT INTO Prescription_History (prescription_id, field_name, old_value, new_value, changed_by, operation_type)
         VALUES (NEW.prescription_id, 'end_date', OLD.end_date, NEW.end_date, @current_user_id, 'UPDATE');
-        
+
         INSERT INTO Audit_Log (user_id, table_name, operation_type, record_id, field_changed, old_value, new_value)
         VALUES (@current_user_id, 'Prescription', 'UPDATE', NEW.prescription_id, 'end_date', OLD.end_date, NEW.end_date);
+    END IF;
+
+    -- Track patient_id changes
+    IF OLD.patient_id != NEW.patient_id THEN
+        INSERT INTO Prescription_History (prescription_id, field_name, old_value, new_value, changed_by, operation_type)
+        VALUES (NEW.prescription_id, 'patient_id', OLD.patient_id, NEW.patient_id, @current_user_id, 'UPDATE');
+
+        INSERT INTO Audit_Log (user_id, table_name, operation_type, record_id, field_changed, old_value, new_value)
+        VALUES (@current_user_id, 'Prescription', 'UPDATE', NEW.prescription_id, 'patient_id', OLD.patient_id, NEW.patient_id);
+    END IF;
+
+    -- Track doctor_id changes
+    IF OLD.doctor_id != NEW.doctor_id THEN
+        INSERT INTO Prescription_History (prescription_id, field_name, old_value, new_value, changed_by, operation_type)
+        VALUES (NEW.prescription_id, 'doctor_id', OLD.doctor_id, NEW.doctor_id, @current_user_id, 'UPDATE');
+
+        INSERT INTO Audit_Log (user_id, table_name, operation_type, record_id, field_changed, old_value, new_value)
+        VALUES (@current_user_id, 'Prescription', 'UPDATE', NEW.prescription_id, 'doctor_id', OLD.doctor_id, NEW.doctor_id);
+    END IF;
+
+    -- Track appointment_id changes
+    IF OLD.appointment_id != NEW.appointment_id THEN
+        INSERT INTO Prescription_History (prescription_id, field_name, old_value, new_value, changed_by, operation_type)
+        VALUES (NEW.prescription_id, 'appointment_id', OLD.appointment_id, NEW.appointment_id, @current_user_id, 'UPDATE');
+
+        INSERT INTO Audit_Log (user_id, table_name, operation_type, record_id, field_changed, old_value, new_value)
+        VALUES (@current_user_id, 'Prescription', 'UPDATE', NEW.prescription_id, 'appointment_id', OLD.appointment_id, NEW.appointment_id);
     END IF;
 END$$
 DELIMITER ;
