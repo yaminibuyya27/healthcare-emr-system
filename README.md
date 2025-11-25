@@ -68,7 +68,17 @@ A comprehensive Electronic Medical Records system built with React and Node.js, 
 
 ## Installation
 
-### 1. Backend Setup
+### 1. Database Setup
+
+The project includes SQL scripts for two database projects:
+
+**Project 1**: Basic database with create and insert queries
+- Run scripts from `backend/sql_files/project1/`
+
+**Project 2**: Advanced database with views, stored procedures, triggers, and indexes
+- Run scripts from `backend/sql_files/project2/` in order
+
+### 2. Backend Setup
 
 ```bash
 cd backend
@@ -87,7 +97,7 @@ npm start
 
 The backend server will start on `http://localhost:8000`
 
-### 2. Frontend Setup
+### 3. Frontend Setup
 
 ```bash
 cd frontend
@@ -112,6 +122,7 @@ EMR_Project2/
 │   │   ├── medications.js     # Medication data
 │   │   ├── patients.js        # Patient CRUD
 │   │   └── prescriptions.js   # Prescription CRUD
+│   ├── sql_files/             # SQL scripts for database setup
 │   ├── config.js              # Database configuration
 │   ├── dbManager.js           # Database operations
 │   ├── server.js              # Express server
