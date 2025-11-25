@@ -1,4 +1,3 @@
-USE EMR_System;
 
 -- INDEXES FOR PROJECT 1 TABLES
 -- Used by Project 2 views and stored procedures

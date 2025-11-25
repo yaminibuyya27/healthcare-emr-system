@@ -1,9 +1,7 @@
-USE EMR_System;
-
 -- Trigger: after_appointment_insert
 DROP TRIGGER IF EXISTS `after_appointment_insert`;
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` TRIGGER `after_appointment_insert` AFTER INSERT ON `appointment` FOR EACH ROW BEGIN
+CREATE TRIGGER `after_appointment_insert` AFTER INSERT ON `Appointment` FOR EACH ROW BEGIN
     INSERT INTO Audit_Log (user_id, table_name, operation_type, record_id, new_value)
     VALUES (
         @current_user_id,
@@ -21,7 +19,7 @@ DELIMITER ;
 -- Trigger: after_appointment_update
 DROP TRIGGER IF EXISTS `after_appointment_update`;
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` TRIGGER `after_appointment_update` AFTER UPDATE ON `appointment` FOR EACH ROW BEGIN
+CREATE TRIGGER `after_appointment_update` AFTER UPDATE ON `Appointment` FOR EACH ROW BEGIN
     IF OLD.appointment_date != NEW.appointment_date THEN
         INSERT INTO Audit_Log (user_id, table_name, operation_type, record_id, field_changed, old_value, new_value)
         VALUES (@current_user_id, 'Appointment', 'UPDATE', NEW.appointment_id, 'appointment_date', OLD.appointment_date, NEW.appointment_date);
@@ -42,7 +40,7 @@ DELIMITER ;
 -- Trigger: before_appointment_delete
 DROP TRIGGER IF EXISTS `before_appointment_delete`;
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` TRIGGER `before_appointment_delete` BEFORE DELETE ON `appointment` FOR EACH ROW BEGIN
+CREATE TRIGGER `before_appointment_delete` BEFORE DELETE ON `Appointment` FOR EACH ROW BEGIN
     INSERT INTO Audit_Log (user_id, table_name, operation_type, record_id, old_value)
     VALUES (
         @current_user_id,
@@ -60,7 +58,7 @@ DELIMITER ;
 -- Trigger: after_patient_insert
 DROP TRIGGER IF EXISTS `after_patient_insert`;
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` TRIGGER `after_patient_insert` AFTER INSERT ON `patient` FOR EACH ROW BEGIN
+CREATE TRIGGER `after_patient_insert` AFTER INSERT ON `Patient` FOR EACH ROW BEGIN
     INSERT INTO Audit_Log (user_id, table_name, operation_type, record_id, new_value)
     VALUES (
         @current_user_id,
@@ -78,7 +76,7 @@ DELIMITER ;
 -- Trigger: after_patient_update
 DROP TRIGGER IF EXISTS `after_patient_update`;
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` TRIGGER `after_patient_update` AFTER UPDATE ON `patient` FOR EACH ROW BEGIN
+CREATE TRIGGER `after_patient_update` AFTER UPDATE ON `Patient` FOR EACH ROW BEGIN
     -- Log each field that changed
     IF OLD.first_name != NEW.first_name THEN
         INSERT INTO Audit_Log (user_id, table_name, operation_type, record_id, field_changed, old_value, new_value)
@@ -110,7 +108,7 @@ DELIMITER ;
 -- Trigger: before_patient_delete
 DROP TRIGGER IF EXISTS `before_patient_delete`;
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` TRIGGER `before_patient_delete` BEFORE DELETE ON `patient` FOR EACH ROW BEGIN
+CREATE TRIGGER `before_patient_delete` BEFORE DELETE ON `Patient` FOR EACH ROW BEGIN
     -- Save complete patient record before deletion
     INSERT INTO Patient_History (
         patient_id, first_name, last_name, date_of_birth, gender,
@@ -139,7 +137,7 @@ DELIMITER ;
 -- Trigger: after_prescription_insert
 DROP TRIGGER IF EXISTS `after_prescription_insert`;
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` TRIGGER `after_prescription_insert` AFTER INSERT ON `prescription` FOR EACH ROW BEGIN
+CREATE TRIGGER `after_prescription_insert` AFTER INSERT ON `Prescription` FOR EACH ROW BEGIN
     INSERT INTO Audit_Log (user_id, table_name, operation_type, record_id, new_value)
     VALUES (
         @current_user_id,
@@ -157,7 +155,7 @@ DELIMITER ;
 -- Trigger: after_prescription_update
 DROP TRIGGER IF EXISTS `after_prescription_update`;
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` TRIGGER `after_prescription_update` AFTER UPDATE ON `prescription` FOR EACH ROW BEGIN
+CREATE TRIGGER `after_prescription_update` AFTER UPDATE ON `Prescription` FOR EACH ROW BEGIN
     -- Save to Prescription_History
     IF OLD.dosage_instructions != NEW.dosage_instructions THEN
         INSERT INTO Prescription_History (prescription_id, field_name, old_value, new_value, changed_by, operation_type)
@@ -188,7 +186,7 @@ DELIMITER ;
 -- Trigger: before_prescription_delete
 DROP TRIGGER IF EXISTS `before_prescription_delete`;
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` TRIGGER `before_prescription_delete` BEFORE DELETE ON `prescription` FOR EACH ROW BEGIN
+CREATE TRIGGER `before_prescription_delete` BEFORE DELETE ON `Prescription` FOR EACH ROW BEGIN
     -- Save complete prescription record before deletion
     INSERT INTO Prescription_History (
         prescription_id, field_name, old_value, new_value, changed_by, operation_type

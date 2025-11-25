@@ -1,9 +1,9 @@
-USE EMR_System;
+
 
 -- Procedure: sp_add_patient
 DROP PROCEDURE IF EXISTS `sp_add_patient`;
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_add_patient`(
+CREATE PROCEDURE `sp_add_patient`(
     IN p_user_id INT,
     IN p_first_name VARCHAR(50),
     IN p_last_name VARCHAR(50),
@@ -56,7 +56,7 @@ DELIMITER ;
 -- Procedure: sp_add_prescription
 DROP PROCEDURE IF EXISTS `sp_add_prescription`;
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_add_prescription`(
+CREATE PROCEDURE `sp_add_prescription`(
     IN p_user_id INT,
     IN p_patient_id INT,
     IN p_appointment_id INT,
@@ -124,7 +124,7 @@ DELIMITER ;
 -- Procedure: sp_check_permission
 DROP PROCEDURE IF EXISTS `sp_check_permission`;
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_check_permission`(
+CREATE PROCEDURE `sp_check_permission`(
     IN p_user_id INT,
     IN p_permission_name VARCHAR(100),
     OUT p_has_permission BOOLEAN
@@ -142,7 +142,7 @@ DELIMITER ;
 -- Procedure: sp_delete_prescription
 DROP PROCEDURE IF EXISTS `sp_delete_prescription`;
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_delete_prescription`(
+CREATE PROCEDURE `sp_delete_prescription`(
     IN p_user_id INT,
     IN p_prescription_id INT,
     OUT p_result VARCHAR(255)
@@ -168,7 +168,7 @@ DELIMITER ;
 -- Procedure: sp_get_doctor_appointments
 DROP PROCEDURE IF EXISTS `sp_get_doctor_appointments`;
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_get_doctor_appointments`(
+CREATE PROCEDURE `sp_get_doctor_appointments`(
         IN p_user_id INT
     )
 BEGIN
@@ -211,7 +211,7 @@ DELIMITER ;
 -- Procedure: sp_list_patients
 DROP PROCEDURE IF EXISTS `sp_list_patients`;
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_list_patients`(
+CREATE PROCEDURE `sp_list_patients`(
     IN p_user_id INT,
     IN p_limit INT,
     IN p_offset INT
@@ -234,7 +234,7 @@ DELIMITER ;
 -- Procedure: sp_schedule_appointment
 DROP PROCEDURE IF EXISTS `sp_schedule_appointment`;
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_schedule_appointment`(
+CREATE PROCEDURE `sp_schedule_appointment`(
     IN p_user_id INT,
     IN p_patient_id INT,
     IN p_doctor_id INT,
@@ -260,7 +260,7 @@ DELIMITER ;
 -- Procedure: sp_search_patients
 DROP PROCEDURE IF EXISTS `sp_search_patients`;
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_search_patients`(
+CREATE PROCEDURE `sp_search_patients`(
     IN p_user_id INT,
     IN p_search_term VARCHAR(100)
 )
@@ -285,7 +285,7 @@ DELIMITER ;
 -- Procedure: sp_update_prescription
 DROP PROCEDURE IF EXISTS `sp_update_prescription`;
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_update_prescription`(
+CREATE PROCEDURE `sp_update_prescription`(
     IN p_user_id INT,
     IN p_prescription_id INT,
     IN p_medication_id INT,
@@ -322,7 +322,7 @@ DELIMITER ;
 -- Procedure: sp_user_login
 DROP PROCEDURE IF EXISTS `sp_user_login`;
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_user_login`(
+CREATE PROCEDURE `sp_user_login`(
     IN p_username VARCHAR(50),
     IN p_password VARCHAR(255)
 )
@@ -368,7 +368,7 @@ DELIMITER ;
 -- Procedure: sp_view_audit_log
 DROP PROCEDURE IF EXISTS `sp_view_audit_log`;
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_view_audit_log`(
+CREATE PROCEDURE `sp_view_audit_log`(
     IN p_user_id INT,
     IN p_limit INT
 )
@@ -391,7 +391,7 @@ DELIMITER ;
 -- Procedure: sp_view_patient
 DROP PROCEDURE IF EXISTS `sp_view_patient`;
 DELIMITER $$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `sp_view_patient`(
+CREATE PROCEDURE `sp_view_patient`(
     IN p_user_id INT,
     IN p_patient_id INT
 )
