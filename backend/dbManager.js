@@ -2,25 +2,45 @@
 const mysql = require('mysql2/promise');
 const config = require('./config');
 
+// Create a shared connection pool for serverless functions
+let pool = null;
+
+function getPool() {
+  if (!pool) {
+    pool = mysql.createPool(config.db);
+  }
+  return pool;
+}
+
 class DatabaseManager {
   constructor() {
     this.config = config.db;
     this.connection = null;
+    this.pool = getPool();
   }
 
   async connect() {
     try {
-      this.connection = await mysql.createConnection(this.config);
+      // Get connection from pool instead of creating new one
+      this.connection = await this.pool.getConnection();
       return true;
     } catch (error) {
       console.error('Error connecting to database:', error.message);
+      console.error('Connection config:', {
+        host: this.config.host,
+        port: this.config.port,
+        database: this.config.database,
+        ssl: this.config.ssl ? 'enabled' : 'disabled'
+      });
       return false;
     }
   }
 
   async close() {
     if (this.connection) {
-      await this.connection.end();
+      // Release connection back to pool instead of closing it
+      this.connection.release();
+      this.connection = null;
     }
   }
 
