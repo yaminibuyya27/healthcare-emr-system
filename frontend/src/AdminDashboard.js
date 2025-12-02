@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Select from 'react-select';
 import axios from 'axios';
+
+const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
 
 function AdminDashboard() {
   const [auditLogs, setAuditLogs] = useState([]);
@@ -16,15 +18,11 @@ function AdminDashboard() {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem('user') || '{}');
 
-  useEffect(() => {
-    loadAuditLogs();
-  }, [limit]);
-
-  const loadAuditLogs = async () => {
+  const loadAuditLogs = useCallback(async () => {
     setLoading(true);
     setError('');
     try {
-      const response = await axios.get(`http://localhost:8000/api/audit-logs?limit=${limit}`, {
+      const response = await axios.get(`${API_BASE_URL}/audit-logs?limit=${limit}`, {
         headers: {
           'x-user-id': user.user_id
         }
@@ -40,7 +38,11 @@ function AdminDashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [limit, user.user_id]);
+
+  useEffect(() => {
+    loadAuditLogs();
+  }, [loadAuditLogs]);
 
   const handleLogout = () => {
     localStorage.removeItem('user');
