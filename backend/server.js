@@ -66,11 +66,13 @@ app.use((err, req, res, next) => {
   });
 });
 
-const PORT = config.server.port;
-const HOST = config.server.host;
+if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+  const PORT = config.server.port;
+  const HOST = config.server.host;
 
-app.listen(PORT, HOST, () => {
-  console.log(`Server running on: http://${HOST}:${PORT}`);
-});
+  app.listen(PORT, HOST, () => {
+    console.log(`Server running on: http://${HOST}:${PORT}`);
+  });
+}
 
 module.exports = app;
