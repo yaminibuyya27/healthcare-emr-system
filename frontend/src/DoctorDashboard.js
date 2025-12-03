@@ -15,6 +15,7 @@ function DoctorDashboard() {
   const [showPrescriptionForm, setShowPrescriptionForm] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [editingPrescription, setEditingPrescription] = useState(null);
+  const [originalPrescriptionData, setOriginalPrescriptionData] = useState(null);
 
   const [prescriptionForm, setPrescriptionForm] = useState({
     patient_id: '',
@@ -37,6 +38,20 @@ function DoctorDashboard() {
     }
     loadMedications();
   }, [activeTab]);
+
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => setError(''), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
+
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => setSuccess(''), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [success]);
 
   const loadAppointments = async () => {
     setLoading(true);
@@ -98,14 +113,40 @@ function DoctorDashboard() {
   const handleEditPrescription = (prescription) => {
     setEditingPrescription(prescription);
     setSelectedAppointment(null);
-    setPrescriptionForm({
+    const formData = {
       medication_id: prescription.medication_id,
       dosage_instructions: prescription.dosage_instructions,
       start_date: prescription.start_date?.split('T')[0] || '',
       end_date: prescription.end_date?.split('T')[0] || '',
       refill_count: prescription.refill_count || 0
-    });
+    };
+    setPrescriptionForm(formData);
+    setOriginalPrescriptionData(formData);
     setShowPrescriptionForm(true);
+  };
+
+  const handleDeletePrescription = async (prescriptionId) => {
+    if (!window.confirm('Are you sure you want to delete this prescription?')) {
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+    setSuccess('');
+
+    try {
+      const response = await prescriptionsAPI.delete(prescriptionId);
+      if (response.data.success) {
+        setSuccess('Prescription deleted successfully');
+        loadPrescriptions();
+      } else {
+        setError(response.data.message || 'Failed to delete prescription');
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to delete prescription');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handlePrescriptionSubmit = async (e) => {
@@ -150,7 +191,27 @@ function DoctorDashboard() {
     });
     setSelectedAppointment(null);
     setEditingPrescription(null);
+    setOriginalPrescriptionData(null);
     setShowPrescriptionForm(false);
+  };
+
+  const isAddFormValid = () => {
+    return (
+      prescriptionForm.medication_id &&
+      prescriptionForm.dosage_instructions.trim() !== '' &&
+      prescriptionForm.start_date !== ''
+    );
+  };
+
+  const hasFormChanges = () => {
+    if (!originalPrescriptionData) return false;
+    return (
+      prescriptionForm.medication_id !== originalPrescriptionData.medication_id ||
+      prescriptionForm.dosage_instructions !== originalPrescriptionData.dosage_instructions ||
+      prescriptionForm.start_date !== originalPrescriptionData.start_date ||
+      prescriptionForm.end_date !== originalPrescriptionData.end_date ||
+      prescriptionForm.refill_count !== originalPrescriptionData.refill_count
+    );
   };
 
   const handleLogout = () => {
@@ -237,6 +298,8 @@ function DoctorDashboard() {
                         value={prescriptionForm.start_date}
                         onChange={(e) => setPrescriptionForm({ ...prescriptionForm, start_date: e.target.value })}
                         style={styles.input}
+                        min={new Date().toISOString().split('T')[0]}
+                        max={prescriptionForm.end_date || undefined}
                         required
                       />
                     </div>
@@ -247,6 +310,7 @@ function DoctorDashboard() {
                         value={prescriptionForm.end_date}
                         onChange={(e) => setPrescriptionForm({ ...prescriptionForm, end_date: e.target.value })}
                         style={styles.input}
+                        min={prescriptionForm.start_date || new Date().toISOString().split('T')[0]}
                       />
                     </div>
                   </div>
@@ -261,7 +325,7 @@ function DoctorDashboard() {
                     />
                   </div>
                   <div style={styles.formActions}>
-                    <button type="submit" style={styles.primaryBtn} disabled={loading}>
+                    <button type="submit" style={styles.primaryBtn} disabled={loading || !isAddFormValid()}>
                       Add Prescription
                     </button>
                     <button type="button" onClick={resetPrescriptionForm} style={styles.secondaryBtn}>
@@ -364,6 +428,8 @@ function DoctorDashboard() {
                         value={prescriptionForm.start_date}
                         onChange={(e) => setPrescriptionForm({ ...prescriptionForm, start_date: e.target.value })}
                         style={styles.input}
+                        min={new Date().toISOString().split('T')[0]}
+                        max={prescriptionForm.end_date || undefined}
                         required
                       />
                     </div>
@@ -374,6 +440,7 @@ function DoctorDashboard() {
                         value={prescriptionForm.end_date}
                         onChange={(e) => setPrescriptionForm({ ...prescriptionForm, end_date: e.target.value })}
                         style={styles.input}
+                        min={prescriptionForm.start_date || new Date().toISOString().split('T')[0]}
                       />
                     </div>
                   </div>
@@ -388,7 +455,7 @@ function DoctorDashboard() {
                     />
                   </div>
                   <div style={styles.formActions}>
-                    <button type="submit" style={styles.primaryBtn} disabled={loading}>
+                    <button type="submit" style={styles.primaryBtn} disabled={loading || !hasFormChanges()}>
                       Update Prescription
                     </button>
                     <button type="button" onClick={resetPrescriptionForm} style={styles.secondaryBtn}>
@@ -434,6 +501,12 @@ function DoctorDashboard() {
                             style={styles.editBtn}
                           >
                             Edit
+                          </button>
+                          <button
+                            onClick={() => handleDeletePrescription(rx.prescription_id)}
+                            style={styles.deleteBtn}
+                          >
+                            Delete
                           </button>
                         </td>
                       </tr>
@@ -635,6 +708,21 @@ const styles = {
     transition: 'all 0.3s ease',
     boxShadow: '0 2px 8px rgba(245, 158, 11, 0.3)',
     textTransform: 'uppercase',
+    letterSpacing: '0.3px',
+    marginRight: '8px'
+  },
+  deleteBtn: {
+    padding: '8px 16px',
+    background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+    color: 'white',
+    border: 'none',
+    borderRadius: '10px',
+    cursor: 'pointer',
+    fontSize: '13px',
+    fontWeight: '600',
+    transition: 'all 0.3s ease',
+    boxShadow: '0 2px 8px rgba(239, 68, 68, 0.3)',
+    textTransform: 'uppercase',
     letterSpacing: '0.3px'
   },
   tableContainer: {
@@ -753,6 +841,11 @@ styleSheet.textContent = `
 
   button:active:not(:disabled) {
     transform: translateY(0);
+  }
+
+  button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed !important;
   }
 
   tbody tr:hover td {

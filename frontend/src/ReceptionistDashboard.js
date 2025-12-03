@@ -17,6 +17,8 @@ function ReceptionistDashboard() {
   const [editingAppointment, setEditingAppointment] = useState(null);
   const [showPatientForm, setShowPatientForm] = useState(false);
   const [showAppointmentForm, setShowAppointmentForm] = useState(false);
+  const [originalPatientData, setOriginalPatientData] = useState(null);
+  const [originalAppointmentData, setOriginalAppointmentData] = useState(null);
 
   const [patientForm, setPatientForm] = useState({
     first_name: '',
@@ -50,6 +52,20 @@ function ReceptionistDashboard() {
       loadDoctors();
     }
   }, [activeTab]);
+
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => setError(''), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
+
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => setSuccess(''), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [success]);
 
   const loadPatients = async () => {
     setLoading(true);
@@ -121,6 +137,8 @@ function ReceptionistDashboard() {
           setSuccess('Patient updated successfully');
           resetPatientForm();
           loadPatients();
+        } else {
+          setError(response.data.message || 'Failed to update patient');
         }
       } else {
         const response = await patientsAPI.create(patientForm);
@@ -128,6 +146,8 @@ function ReceptionistDashboard() {
           setSuccess('Patient added successfully');
           resetPatientForm();
           loadPatients();
+        } else {
+          setError(response.data.message || 'Failed to add patient');
         }
       }
     } catch (err) {
@@ -150,6 +170,8 @@ function ReceptionistDashboard() {
           setSuccess('Appointment updated successfully');
           resetAppointmentForm();
           loadAppointments();
+        } else {
+          setError(response.data.message || 'Failed to update appointment');
         }
       } else {
         const response = await appointmentsAPI.create(appointmentForm);
@@ -157,6 +179,8 @@ function ReceptionistDashboard() {
           setSuccess('Appointment scheduled successfully');
           resetAppointmentForm();
           loadAppointments();
+        } else {
+          setError(response.data.message || 'Failed to schedule appointment');
         }
       }
     } catch (err) {
@@ -164,6 +188,53 @@ function ReceptionistDashboard() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const hasPatientFormChanged = () => {
+    if (!editingPatient || !originalPatientData) return true;
+
+    return (
+      patientForm.first_name !== originalPatientData.first_name ||
+      patientForm.last_name !== originalPatientData.last_name ||
+      patientForm.date_of_birth !== originalPatientData.date_of_birth ||
+      patientForm.gender !== originalPatientData.gender ||
+      patientForm.phone_number !== originalPatientData.phone_number ||
+      patientForm.email_address !== originalPatientData.email_address ||
+      patientForm.street_address !== originalPatientData.street_address ||
+      patientForm.city !== originalPatientData.city ||
+      patientForm.state !== originalPatientData.state ||
+      patientForm.postal_code !== originalPatientData.postal_code
+    );
+  };
+
+  const isAddPatientFormValid = () => {
+    return (
+      patientForm.first_name.trim() !== '' &&
+      patientForm.last_name.trim() !== '' &&
+      patientForm.date_of_birth !== '' &&
+      patientForm.gender !== '' &&
+      patientForm.phone_number.trim() !== ''
+    );
+  };
+
+  const isAddAppointmentFormValid = () => {
+    return (
+      appointmentForm.patient_id !== '' &&
+      appointmentForm.doctor_id !== '' &&
+      appointmentForm.appointment_date !== '' &&
+      appointmentForm.reason_for_visit.trim() !== ''
+    );
+  };
+
+  const hasAppointmentFormChanged = () => {
+    if (!editingAppointment || !originalAppointmentData) return true;
+    return (
+      appointmentForm.patient_id !== originalAppointmentData.patient_id ||
+      appointmentForm.doctor_id !== originalAppointmentData.doctor_id ||
+      appointmentForm.appointment_date !== originalAppointmentData.appointment_date ||
+      appointmentForm.reason_for_visit !== originalAppointmentData.reason_for_visit ||
+      appointmentForm.status !== originalAppointmentData.status
+    );
   };
 
   const resetPatientForm = () => {
@@ -180,6 +251,7 @@ function ReceptionistDashboard() {
       postal_code: ''
     });
     setEditingPatient(null);
+    setOriginalPatientData(null);
     setShowPatientForm(false);
   };
 
@@ -192,19 +264,22 @@ function ReceptionistDashboard() {
       status: 'Scheduled'
     });
     setEditingAppointment(null);
+    setOriginalAppointmentData(null);
     setShowAppointmentForm(false);
   };
 
   const editAppointment = (appointment) => {
     setEditingAppointment(appointment);
     loadPatients();
-    setAppointmentForm({
+    const formData = {
       patient_id: appointment.patient_id,
       doctor_id: appointment.doctor_id,
       appointment_date: appointment.appointment_date?.split('.')[0] || '',
       reason_for_visit: appointment.reason_for_visit,
       status: appointment.status || 'Scheduled'
-    });
+    };
+    setAppointmentForm(formData);
+    setOriginalAppointmentData(formData);
     setShowAppointmentForm(true);
   };
 
@@ -222,6 +297,8 @@ function ReceptionistDashboard() {
       if (response.data.success) {
         setSuccess('Appointment deleted successfully');
         loadAppointments();
+      } else {
+        setError(response.data.message || 'Failed to delete appointment');
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to delete appointment');
@@ -232,7 +309,7 @@ function ReceptionistDashboard() {
 
   const editPatient = (patient) => {
     setEditingPatient(patient);
-    setPatientForm({
+    const formData = {
       first_name: patient.first_name,
       last_name: patient.last_name,
       date_of_birth: patient.date_of_birth?.split('T')[0] || '',
@@ -243,7 +320,9 @@ function ReceptionistDashboard() {
       city: patient.city || '',
       state: patient.state || '',
       postal_code: patient.postal_code || ''
-    });
+    };
+    setPatientForm(formData);
+    setOriginalPatientData(formData);
     setShowPatientForm(true);
   };
 
@@ -285,7 +364,14 @@ function ReceptionistDashboard() {
           <div>
             <div style={styles.header}>
               <h3 style={styles.tabContent}>Patient Management</h3>
-              <button onClick={() => setShowPatientForm(!showPatientForm)} style={styles.primaryBtn}>
+              <button onClick={() => {
+                if (showPatientForm) {
+                  resetPatientForm();
+                } else {
+                  resetPatientForm();
+                  setShowPatientForm(true);
+                }
+              }} style={styles.primaryBtn}>
                 {showPatientForm ? 'Cancel' : 'Add New Patient'}
               </button>
             </div>
@@ -324,6 +410,7 @@ function ReceptionistDashboard() {
                         value={patientForm.date_of_birth}
                         onChange={(e) => setPatientForm({ ...patientForm, date_of_birth: e.target.value })}
                         style={styles.input}
+                        max={new Date().toISOString().split('T')[0]}
                         required
                       />
                     </div>
@@ -403,7 +490,11 @@ function ReceptionistDashboard() {
                     </div>
                   </div>
                   <div style={styles.formActions}>
-                    <button type="submit" style={styles.primaryBtn} disabled={loading}>
+                    <button
+                      type="submit"
+                      style={styles.primaryBtn}
+                      disabled={loading || (editingPatient ? !hasPatientFormChanged() : !isAddPatientFormValid())}
+                    >
                       {editingPatient ? 'Update Patient' : 'Add Patient'}
                     </button>
                     <button type="button" onClick={resetPatientForm} style={styles.secondaryBtn}>
@@ -424,7 +515,7 @@ function ReceptionistDashboard() {
                 style={styles.searchInput}
               />
               <button onClick={handleSearch} style={styles.searchBtn}>Search</button>
-              <button onClick={loadPatients} style={styles.secondaryBtn}>Clear</button>
+              <button onClick={() => { setSearchQuery(''); loadPatients(); }} style={styles.secondaryBtn}>Clear</button>
             </div>
 
             <div style={styles.tableContainer}>
@@ -437,14 +528,15 @@ function ReceptionistDashboard() {
                     <th style={styles.th}>Gender</th>
                     <th style={styles.th}>Phone</th>
                     <th style={styles.th}>Email</th>
+                    <th style={styles.th}>City</th>
                     <th style={styles.th}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {loading ? (
-                    <tr><td colSpan="7" style={styles.td}>Loading...</td></tr>
+                    <tr><td colSpan="8" style={styles.td}>Loading...</td></tr>
                   ) : patients.length === 0 ? (
-                    <tr><td colSpan="7" style={styles.td}>No patients found</td></tr>
+                    <tr><td colSpan="8" style={styles.td}>No patients found</td></tr>
                   ) : (
                     patients.map(patient => (
                       <tr key={patient.patient_id}>
@@ -454,6 +546,7 @@ function ReceptionistDashboard() {
                         <td style={styles.td}>{patient.gender}</td>
                         <td style={styles.td}>{patient.phone_number}</td>
                         <td style={styles.td}>{patient.email_address}</td>
+                        <td style={styles.td}>{patient.city || '-'}</td>
                         <td style={styles.td}>
                           <button onClick={() => editPatient(patient)} style={styles.editBtn}>
                             Edit
@@ -472,7 +565,14 @@ function ReceptionistDashboard() {
           <div>
             <div style={styles.header}>
               <h3 style={styles.tabContent}>Appointments</h3>
-              <button onClick={() => setShowAppointmentForm(!showAppointmentForm)} style={styles.primaryBtn}>
+              <button onClick={() => {
+                if (showAppointmentForm) {
+                  resetAppointmentForm();
+                } else {
+                  resetAppointmentForm();
+                  setShowAppointmentForm(true);
+                }
+              }} style={styles.primaryBtn}>
                 {showAppointmentForm ? 'Cancel' : 'Schedule New Appointment'}
               </button>
             </div>
@@ -526,6 +626,7 @@ function ReceptionistDashboard() {
                       value={appointmentForm.appointment_date}
                       onChange={(e) => setAppointmentForm({ ...appointmentForm, appointment_date: e.target.value })}
                       style={styles.input}
+                      min={new Date().toISOString().slice(0, 16)}
                       required
                     />
                   </div>
@@ -555,7 +656,11 @@ function ReceptionistDashboard() {
                     </div>
                   )}
                   <div style={styles.formActions}>
-                    <button type="submit" style={styles.primaryBtn} disabled={loading}>
+                    <button
+                      type="submit"
+                      style={styles.primaryBtn}
+                      disabled={loading || (editingAppointment ? !hasAppointmentFormChanged() : !isAddAppointmentFormValid())}
+                    >
                       {editingAppointment ? 'Update Appointment' : 'Schedule Appointment'}
                     </button>
                     <button type="button" onClick={resetAppointmentForm} style={styles.secondaryBtn}>
@@ -949,6 +1054,11 @@ styleSheet.textContent = `
 
   button:active:not(:disabled) {
     transform: translateY(0);
+  }
+
+  button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 
   tr:hover {

@@ -149,16 +149,27 @@ CREATE PROCEDURE `sp_delete_prescription`(
 )
 BEGIN
     DECLARE v_has_permission BOOLEAN;
-    
+    DECLARE v_prescription_exists INT;
+
+    -- Set user context for trigger
+    SET @current_user_id = p_user_id;
+
     CALL sp_check_permission(p_user_id, 'DELETE_PRESCRIPTION', v_has_permission);
-    
+
     IF v_has_permission THEN
-        DELETE FROM Prescription WHERE prescription_id = p_prescription_id;
-        
-        INSERT INTO Audit_Log (user_id, table_name, operation_type, record_id)
-        VALUES (p_user_id, 'Prescription', 'DELETE', p_prescription_id);
-        
-        SET p_result = 'Prescription deleted successfully';
+        -- Check if prescription exists
+        SELECT COUNT(*) INTO v_prescription_exists
+        FROM Prescription
+        WHERE prescription_id = p_prescription_id;
+
+        IF v_prescription_exists > 0 THEN
+            -- Delete the prescription (CASCADE will handle Prescription_History)
+            DELETE FROM Prescription WHERE prescription_id = p_prescription_id;
+
+            SET p_result = 'Prescription deleted successfully';
+        ELSE
+            SET p_result = 'Prescription not found';
+        END IF;
     ELSE
         SET p_result = 'Permission denied: Cannot delete prescription';
     END IF;
@@ -279,6 +290,61 @@ BEGIN
        OR first_name LIKE CONCAT('%', p_search_term, '%')
     ORDER BY last_name, first_name
     LIMIT 50;
+END$$
+DELIMITER ;
+
+-- Procedure: sp_update_patient
+DROP PROCEDURE IF EXISTS `sp_update_patient`;
+DELIMITER $$
+CREATE PROCEDURE `sp_update_patient`(
+    IN p_user_id INT,
+    IN p_patient_id INT,
+    IN p_first_name VARCHAR(50),
+    IN p_last_name VARCHAR(50),
+    IN p_date_of_birth DATE,
+    IN p_gender ENUM('Male', 'Female', 'Other'),
+    IN p_phone_number VARCHAR(20),
+    IN p_email_address VARCHAR(100),
+    IN p_street_address VARCHAR(200),
+    IN p_city VARCHAR(100),
+    IN p_state VARCHAR(50),
+    IN p_postal_code VARCHAR(20)
+)
+BEGIN
+    DECLARE v_has_permission BOOLEAN;
+
+    -- Check permission
+    CALL sp_check_permission(p_user_id, 'UPDATE_PATIENT', v_has_permission);
+
+    IF v_has_permission THEN
+        -- Set user context for trigger
+        SET @current_user_id = p_user_id;
+
+        -- Update patient
+        UPDATE Patient
+        SET
+            first_name = p_first_name,
+            last_name = p_last_name,
+            date_of_birth = p_date_of_birth,
+            gender = p_gender,
+            phone_number = p_phone_number,
+            email_address = p_email_address,
+            street_address = p_street_address,
+            city = p_city,
+            state = p_state,
+            postal_code = p_postal_code
+        WHERE patient_id = p_patient_id;
+
+        -- Return success
+        SELECT
+            1 as success,
+            'Patient updated successfully' as message;
+    ELSE
+        -- Return permission denied
+        SELECT
+            0 as success,
+            'Permission denied: Cannot update patient' as message;
+    END IF;
 END$$
 DELIMITER ;
 

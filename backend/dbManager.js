@@ -419,7 +419,11 @@ class DatabaseManager {
           date_of_birth,
           gender,
           phone_number,
-          email_address
+          email_address,
+          street_address,
+          city,
+          state,
+          postal_code
         FROM Patient
         ORDER BY patient_id ASC
       `);

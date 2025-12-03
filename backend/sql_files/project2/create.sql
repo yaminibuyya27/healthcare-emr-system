@@ -95,7 +95,7 @@ CREATE TABLE `Prescription_History` (
   `changed_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `operation_type` enum('UPDATE','DELETE') NOT NULL,
   PRIMARY KEY (`history_id`),
-  CONSTRAINT `prescription_history_ibfk_1` FOREIGN KEY (`prescription_id`) REFERENCES `Prescription` (`prescription_id`),
+  CONSTRAINT `prescription_history_ibfk_1` FOREIGN KEY (`prescription_id`) REFERENCES `Prescription` (`prescription_id`) ON DELETE CASCADE,
   CONSTRAINT `prescription_history_ibfk_2` FOREIGN KEY (`changed_by`) REFERENCES `User` (`user_id`)
 );
 
